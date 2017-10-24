@@ -110,15 +110,19 @@ INC_PATHS+=-I$(CHDK_SRC_DIR)
 
 CFLAGS+=$(INC_PATHS) -DCHDKPTP_BUILD_NUM=$(SVNREV) -DCHDKPTP_REL_DESC="\"alpha\""
 
-LDFLAGS+=$(LIB_PATHS) $(patsubst %,-l%,$(LINK_LIBS) $(SYS_LIBS)) 
+LDFLAGS+=$(LIB_PATHS) $(patsubst %,-l%,$(LINK_LIBS) $(SYS_LIBS))
 
 SUBDIRS=lfs
 
 CHDKPTP_EXE=chdkptp$(EXE_EXTRA)$(EXE)
 
+CHDKPTP_LIB=chdkptp$(EXE_EXTRA)$(LIB)
+
 EXES=$(CHDKPTP_EXE)
 
-all: $(EXES)
+LIBS=$(CHDKPTP_LIB)
+
+all: $(EXES) $(LIBS)
 
 SRCS=properties.c ptp.c chdkptp.c lbuf.c liveimg.c rawimg.c luautil.c $(PTPIP_SRCS)
 OBJS=$(SRCS:.c=.o)
@@ -126,6 +130,8 @@ OBJS=$(SRCS:.c=.o)
 $(CHDKPTP_EXE): $(OBJS)
 	$(CC) -o $@ lfs/lfs.o $^ $(LDFLAGS)
 
+$(CHDKPTP_LIB): $(OBJS)
+	$(CC) -shared -o $@ lfs/lfs.o $^ $(LDFLAGS)
 
 # temp for PTP/IP test code
 ifeq ($(OSTYPE),Windows)

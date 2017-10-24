@@ -202,7 +202,7 @@ ptp_usb_read_func (unsigned char *bytes, unsigned max_size, void *data)
 	int read_size = 0;
 	do {
 		bytes+=toread;
-		if (rbytes>PTPCAM_USB_URB) 
+		if (rbytes>PTPCAM_USB_URB)
 			toread = PTPCAM_USB_URB;
 		else
 			toread = rbytes;
@@ -231,7 +231,7 @@ ptp_usb_read_func (unsigned char *bytes, unsigned max_size, void *data)
 	if (result >= 0) {
 		return read_size;
 	}
-	else 
+	else
 	{
 		if (verbose) perror("usb_bulk_read");
 		return -1;
@@ -342,7 +342,7 @@ char my_name[] = {
 // TODO
 static int init_event_channel_tcp(PTP_CON_STATE* ptp_cs) {
 	printf("initializing event channel\n");
-	
+
 	// Create a socket for the command channel
 	socket_t sock = socket(ptp_cs->tcp.ai_con->ai_family, ptp_cs->tcp.ai_con->ai_socktype, ptp_cs->tcp.ai_con->ai_protocol);
 	if (sock == INVALID_SOCKET) {
@@ -361,7 +361,7 @@ static int init_event_channel_tcp(PTP_CON_STATE* ptp_cs) {
 	// todo should use htod*
 	pkt.type = PTPIP_TYPE_INIT_EVENT;
 	pkt.length = 12; // header + connection number
-	
+
 	*(uint32_t *)(pkt.data) = ptp_cs->tcp.connection_id;
 	int result = send( ptp_cs->tcp.event_sock, (char *)&pkt, pkt.length, 0 );
 	if (result == SOCKET_ERROR) {
@@ -389,7 +389,7 @@ static int init_event_channel_tcp(PTP_CON_STATE* ptp_cs) {
 		printf("connection closed\n");
 		return 0;
 	} else {
-		printf("recv failed with error: %d %s\n", sockutil_errno(),sockutil_strerror(sockutil_errno())); 
+		printf("recv failed with error: %d %s\n", sockutil_errno(),sockutil_strerror(sockutil_errno()));
 		return 0;
 	}
 	return 1;
@@ -464,7 +464,7 @@ int init_ptp_tcp(PTPParams* params, PTP_CON_STATE* ptp_cs) {
 
 	char *p = (char *)pkt.data;
 	memcpy(p,my_guid,sizeof(my_guid));
-	
+
 	p+=sizeof(my_guid);
 
 	memcpy(p,my_name,sizeof(my_name));
@@ -752,10 +752,10 @@ reset_device (struct usb_device *dev)
 		printf("init_ptp_usb failed\n");
 		return;
 	}
-	
+
 	/* get device status (devices likes that regardless of its result)*/
 	usb_ptp_get_device_status(&ptp_cs,devstatus);
-	
+
 	/* check the in endpoint status*/
 	ret = usb_get_endpoint_status(&ptp_cs,ptp_cs.usb.inep,&status);
 	if (ret<0) perror ("usb_get_endpoint_status()");
@@ -788,15 +788,15 @@ reset_device (struct usb_device *dev)
 
 	/* get device status (now there should be some results)*/
 	ret = usb_ptp_get_device_status(&ptp_cs,devstatus);
-	if (ret<0) 
+	if (ret<0)
 		perror ("usb_ptp_get_device_status()");
 	else	{
-		if (devstatus[1]==PTP_RC_OK) 
+		if (devstatus[1]==PTP_RC_OK)
 			printf ("Device status OK\n");
 		else
 			printf ("Device status 0x%04x\n",devstatus[1]);
 	}
-	
+
 	/* finally reset the device (that clears prevoiusly opened sessions)*/
 	ret = usb_ptp_device_reset(&ptp_cs);
 	if (ret<0)perror ("usb_ptp_device_reset()");
@@ -825,7 +825,7 @@ static void close_connection(PTPParams *params,PTP_CON_STATE *ptp_cs)
 
 static int check_connection_status_usb(PTP_CON_STATE *ptp_cs) {
 	uint16_t devstatus[2] = {0,0};
-	
+
 	// TODO shouldn't ever be true
 	if(!ptp_cs->connected) {// never initialized
 		return 0;
@@ -929,10 +929,10 @@ int open_camera_dev_usb(struct usb_device *dev, PTP_CON_STATE *ptp_cs, PTPParams
 		if (ret<0)perror ("open_camera_dev_usb:usb_ptp_device_reset()");
 		/* get device status (devices likes that regardless of its result)*/
 		ret = usb_ptp_get_device_status(ptp_cs,devstatus);
-		if (ret<0) 
+		if (ret<0)
 			perror ("usb_ptp_get_device_status()");
 		else	{
-			if (devstatus[1]==PTP_RC_OK) 
+			if (devstatus[1]==PTP_RC_OK)
 				printf ("Device status OK\n");
 			else
 				printf ("Device status 0x%04x\n",devstatus[1]);
@@ -1119,14 +1119,14 @@ chdk_connection=chdk.connection([devspec])
 devspec={
 	bus="bus",
 	dev="dev",
-} 
+}
 or
 devspec={
 	host="host",
 	port="port",
-} 
+}
 retreive or create the connection object for the specified device
-each unique bus/dev combination has only one connection object. 
+each unique bus/dev combination has only one connection object.
 No attempt is made to verify that the device exists (it might be plugged/unplugged later anyway)
 New connections start disconnected.
 An existing connection may or may not be connected
@@ -1247,7 +1247,7 @@ throws on error or if already connected
 */
 static int chdk_connect(lua_State *L) {
 	CHDK_CONNECTION_METHOD;
-	
+
 	// TODO might want to disconnect/reconnect, or check real connection status ? or options
 	if(ptp_cs->connected) {
 		return api_throw_error(L,"connect_connected","connection already connected");
@@ -1275,7 +1275,7 @@ static int chdk_is_connected(lua_State *L) {
   	CHDK_CONNECTION_METHOD;
 	// TODO this should probably be more consistent over other PTP calls, #41
 	// flag says we are connected, check usb and update flag
-	if(ptp_cs->connected) { 
+	if(ptp_cs->connected) {
 		if(ptp_cs->con_type == PTP_CON_USB) {
 			ptp_cs->connected = check_connection_status_usb(ptp_cs);
 		} else {
@@ -1370,8 +1370,8 @@ static int chdk_execlua(lua_State *L) {
 /*
 push a new table onto the stack
 {
-	"bus" = "dirname", 
-	"dev" = "filename", 
+	"bus" = "dirname",
+	"dev" = "filename",
 	"vendor_id" = VENDORID,
 	"product_id" = PRODUCTID,
 }
@@ -1443,7 +1443,7 @@ static int chdk_download(lua_State *L) {
 
 /*
 isready,imgnum=con:capture_ready()
-isready: 
+isready:
 	false: local error in errmsg
 	0: not ready
 	0x10000000: remotecap not initialized, or timed out
@@ -1634,7 +1634,7 @@ static int chdk_get_live_data(lua_State *L) {
 	return 1;
 }
 
-// TODO these assume numbers are 0 based and contiguous 
+// TODO these assume numbers are 0 based and contiguous
 static const char* script_msg_type_to_name(unsigned type_id) {
 	const char *names[]={"none","error","return","user"};
 	if(type_id >= sizeof(names)/sizeof(names[0])) {
@@ -1666,7 +1666,7 @@ msg:{
 	script_id=number
 	mtype=string -- one of "none","error","return","user"
 	msubtype=string -- for returns and user messages, one of
-	                -- "unsupported","nil","boolean","integer","string","table" 
+	                -- "unsupported","nil","boolean","integer","string","table"
 					-- for errors, one of "compile","runtime"
 }
 no message: type is set to 'none'
@@ -1695,8 +1695,8 @@ static int chdk_read_msg(lua_State *L) {
 			lua_setfield(L, -2, "subtype");
 			switch(msg->subtype) {
 				case PTP_CHDK_TYPE_UNSUPPORTED: // type name will be returned in data
-				case PTP_CHDK_TYPE_STRING: 
-				case PTP_CHDK_TYPE_TABLE: // tables are returned as a serialized string. 
+				case PTP_CHDK_TYPE_STRING:
+				case PTP_CHDK_TYPE_TABLE: // tables are returned as a serialized string.
 										  // The user is responsible for unserializing, to allow different serialization methods
 					lua_pushlstring(L, msg->data,msg->size);
 					lua_setfield(L, -2, "value");
@@ -2119,10 +2119,10 @@ static int guisys_init(lua_State *L) {
 #ifdef CHDKPTP_IUP
 	if(!gui_inited) {
 		gui_inited = 1;
-		iuplua_open(L); 
+		iuplua_open(L);
 #ifdef CHDKPTP_CD
-		cdlua_open(L); 
-		cdluaiup_open(L); 
+		cdlua_open(L);
+		cdluaiup_open(L);
 #ifdef CHDKPTP_CD_PLUS
 		cdInitContextPlus();
 #endif // CD_PLUS
@@ -2142,7 +2142,7 @@ static int uninit_gui_libs(lua_State *L) {
 #ifdef CHDKPTP_CD
 		cdlua_close(L);
 #endif
-		iuplua_close(L); 
+		iuplua_close(L);
 //		IupClose(); // ???
 		return 1;
 	}
@@ -2193,7 +2193,11 @@ static const luaL_Reg lua_errlib[] = {
 };
 
 
-static int chdkptp_registerlibs(lua_State *L) {
+int luaopen_chdkptp(lua_State *L) {
+	usb_init();
+	luaopen_lfs(L);
+	luaopen_lbuf(L);
+	luaopen_rawimg(L);
 	/* set up meta table for error object */
 	luaL_newmetatable(L,CHDK_API_ERROR_META);
 	lua_pushcfunction(L,api_error_tostring);
@@ -2212,7 +2216,7 @@ static int chdkptp_registerlibs(lua_State *L) {
 	/* register functions that operate on a connection
 	 * lua code can use them to implement OO connection interface
 	*/
-	luaL_register(L, "chdk_connection", chdkconnection);  
+	luaL_register(L, "chdk_connection", chdkconnection);
 
 	/* register functions that don't require a connection */
 	luaL_register(L, "chdk", chdklib);
@@ -2224,8 +2228,8 @@ static int chdkptp_registerlibs(lua_State *L) {
 	luaL_register(L, "corevar", lua_corevar);
 	luaL_register(L, "guisys", lua_guisyslib);
 
-	luaopen_liveimg(L);	
-	
+	luaopen_liveimg(L);
+
 	// create a table to keep track of connections
 	lua_newtable(L);
 	// metatable for above
@@ -2262,13 +2266,10 @@ int main(int argc, char ** argv)
 	g_argv = argv;
 	/* register signal handlers */
 //	signal(SIGINT, ptpcam_siginthandler);
-	usb_init();
+//	usb_init();
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
-	luaopen_lfs(L);
-	luaopen_lbuf(L);
-	luaopen_rawimg(L);	
-	chdkptp_registerlibs(L);
+  luaopen_chdkptp(L);
 	int r=exec_lua_string(L,"require('main')");
 	uninit_gui_libs(L);
 	lua_close(L);

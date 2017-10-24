@@ -1,0 +1,83 @@
+Index: trunk/include.mk
+===================================================================
+--- trunk/include.mk    (revision 599)
++++ trunk/include.mk    (working copy)
+@@ -7,6 +7,7 @@
+ ifeq ($(HOSTPLATFORM),MINGW)
+ OSTYPE=Windows
+ EXE=.exe
++LIB=.dll
+ # Note may be freetype or freetype6 depending on your CD version, zlib requried for 5.5 and later
+ CD_FREETYPE_LIB=freetype6 z
+ #CD_FREETYPE_LIB=freetype z
+@@ -14,6 +15,7 @@
+ ifeq ($(HOSTPLATFORM),Linux)
+ OSTYPE=Linux
+ EXE=
++LIB=.so
+ CD_FREETYPE_LIB=freetype z
+ endif
+ endif
+Index: trunk/Makefile
+===================================================================
+--- trunk/Makefile      (revision 599)
++++ trunk/Makefile      (working copy)
+@@ -114,17 +114,24 @@
+
+ CHDKPTP_EXE=chdkptp$(EXE_EXTRA)$(EXE)
+
++CHDKPTP_LIB=chdkptp$(EXE_EXTRA)$(LIB)
++
+ EXES=$(CHDKPTP_EXE)
+
+-all: $(EXES)
++LIBS=$(CHDKPTP_LIB)
+
++all: $(EXES) $(LIBS)
++
+ SRCS=properties.c ptp.c chdkptp.c lbuf.c liveimg.c rawimg.c luautil.c $(PTPIP_SRCS)
+ OBJS=$(SRCS:.c=.o)
+
+ $(CHDKPTP_EXE): $(OBJS)
+        $(CC) -o $@ lfs/lfs.o $^ $(LDFLAGS)
+
++$(CHDKPTP_LIB): $(OBJS)
++       $(CC) -shared -o $@ lfs/lfs.o $^ $(LDFLAGS)
+
++
+ # temp for PTP/IP test code
+ ifeq ($(OSTYPE),Windows)
+ NET_LIBS=-lws2_32
+Index: trunk/chdkptp.c
+===================================================================
+--- trunk/chdkptp.c     (revision 599)
++++ trunk/chdkptp.c     (working copy)
+@@ -2160,7 +2160,11 @@
+ };
+
+
+-static int chdkptp_registerlibs(lua_State *L) {
++int luaopen_chdkptp(lua_State *L) {
++       usb_init();
++       luaopen_lfs(L);
++       luaopen_lbuf(L);
++       luaopen_rawimg(L);
+        /* set up meta table for error object */
+        luaL_newmetatable(L,CHDK_API_ERROR_META);
+        lua_pushcfunction(L,api_error_tostring);
+@@ -2229,13 +2233,10 @@
+        g_argv = argv;
+        /* register signal handlers */
+ //     signal(SIGINT, ptpcam_siginthandler);
+-       usb_init();
++//     usb_init();
+        lua_State *L = luaL_newstate();
+        luaL_openlibs(L);
+-       luaopen_lfs(L);
+-       luaopen_lbuf(L);
+-       luaopen_rawimg(L);
+-       chdkptp_registerlibs(L);
++       luaopen_chdkptp(L);
+        exec_lua_string(L,"require('main')");
+        uninit_gui_libs(L);
+        lua_close(L);

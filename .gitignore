@@ -54,6 +54,9 @@ dkms.conf
 # chdkptp
 config.mk
 chdkptp.sh
+chdkptp
+chdkptp.so
+test_lib*
 
 # svn
 .svn*

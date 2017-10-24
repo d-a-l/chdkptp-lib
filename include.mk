@@ -7,13 +7,15 @@ HOSTPLATFORM:=$(patsubst MINGW%,MINGW,$(shell uname -s))
 ifeq ($(HOSTPLATFORM),MINGW)
 OSTYPE=Windows
 EXE=.exe
+LIB=.dll
 # Note may be freetype or freetype6 depending on your CD version, zlib requried for 5.5 and later
 CD_FREETYPE_LIB=freetype6 z
 #CD_FREETYPE_LIB=freetype z
 else
 ifeq ($(HOSTPLATFORM),Linux)
 OSTYPE=Linux
-EXE= 
+EXE=
+LIB=.so
 CD_FREETYPE_LIB=freetype z
 endif
 endif
@@ -22,7 +24,7 @@ endif
 EXE_EXTRA=
 
 CC=gcc
-CFLAGS=-DCHDKPTP_OSTYPE=\"$(OSTYPE)\" -Wall
+CFLAGS=-DCHDKPTP_OSTYPE=\"$(OSTYPE)\" -Wall -fPIC -g
 LDFLAGS=
 #LD=ld
 
@@ -116,4 +118,3 @@ cleand-recursive:
 		echo \>\> Cleaning dep in $(FOLDER)$$i; \
 		$(MAKE) -C $$i FOLDER="$(FOLDER)$$i/" cleand || exit 1; \
 	done
-
